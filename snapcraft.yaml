@@ -1,0 +1,141 @@
+name: flaresolverr-tak
+summary: UnOfficial release of FlareSolverr
+description: |
+  FlareSolverr is a proxy server to bypass Cloudflare and DDoS-GUARD protection.
+
+  The API service is accessible by default at http://localhost:8191
+
+  See https://github.com/FlareSolverr/FlareSolverr for more details.
+
+  FlareSolverr Release 3.3.25+
+  Service is restarted on any condition.
+
+  Post install command to check if service is running well and responses:
+  sudo snap logs flaresolverr-tak
+  
+  Hosts with limited resources might need to increase timeout (Check with 90s).
+  
+  This snap embeds Chrome .deb from Google servers as external executables cannot be called from a Snap and Ubuntu does not provides Chromium's packages ('chromium-desktop' package is a symlink to Chromium's snap).
+  Thus it has quite an important size for the service it provides.
+  Thus it is limited to AMD64 architecture for now.
+website: https://github.com/FlareSolverr/FlareSolverr
+source-code: https://github.com/TehAppKiller/flaresolverr-tak
+issues: https://github.com/TehAppKiller/flaresolverr-tak/issues
+contact: mailto:tehappkiller@proton.me
+donation: https://whydonate.com/en/fundraising/help-teh-devz
+license: MIT
+icon: icon.svg
+grade: stable
+confinement: strict
+base: core24
+adopt-info: flaresolverr
+platforms:
+  amd64:
+
+apps:
+  flaresolverr:
+    command: bin/run-flaresolverr.sh
+    daemon: simple
+    restart-condition: always
+    plugs:
+      - x11
+      
+layout:
+  /usr/share/X11:
+    symlink: $SNAP/usr/share/X11
+  /opt/google/chrome:
+    symlink: $SNAP/opt/google/chrome
+  /usr/bin/google-chrome-stable:
+    symlink: $SNAP/usr/bin/google-chrome-stable
+    
+plugs:
+  shared-memory:
+    private: true # Requirement for multithreaded Python
+
+parts:
+  chrome:
+    plugin: dump
+    source: https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+    source-type: deb
+    
+  flaresolverr:
+    source: .
+    plugin: python
+    python-requirements:
+      - requirements.txt
+    build-packages:
+      - curl
+      - git
+    override-pull: |
+      craftctl default
+      
+      # Get Last Source Tag version
+      src_version=$(git ls-remote --tags --sort='version:refname' https://github.com/FlareSolverr/FlareSolverr.git | grep '\/v[0-9]*\.[0-9]*\.[0-9]*$' | tail -n 1 | sed 's/.*\/v//');
+      echo "Source last tag: ${src_version}"
+      snap_last_version=$(curl -sL -H "Snap-Device-Series: 16" "https://api.snapcraft.io/v2/snaps/info/flaresolverr-tak?architecture=${CRAFT_ARCH_BUILD_FOR}&fields=version" | sed -nre "s/^.*\"stable\"\,\"track\"\:\"latest\"\}\,\"version\"\:\"([^\"]*)\".*/\1/p");
+      echo "Snap last version: ${snap_last_version}"
+      snap_build_with_same_version=$(echo $snap_last_version | sed -nre "s/^($src_version.*).*/\1/p");
+      # Same version ?
+      if [ -z "$snap_build_with_same_version" ]
+      then
+        new_snap_version="${src_version}";
+      else
+        # Get snap build version
+        snap_build=$(echo $snap_build_with_same_version | sed -nre 's/^.*-v([0-9]*).*/\1/p');
+        # Already a build version ?
+        if [ -z "$snap_build" ]
+        then
+          # init @v2
+          new_snap_build="2";
+        else
+          # increment @v+1
+          new_snap_build=$(($snap_build+1));
+        fi
+
+        new_snap_version="${src_version}-v${new_snap_build}";
+      fi
+
+      craftctl set version=$new_snap_version
+
+      # Pull
+      rm -rf $CRAFT_PART_SRC/{,.[!.],..?}*
+      git clone -b v$src_version --depth=1 --recurse-submodules https://github.com/FlareSolverr/FlareSolverr.git .
+      
+      # Build
+      INST_DIR="$CRAFT_PART_INSTALL/Flaresolverr"
+      mkdir -p "$INST_DIR"
+      cp -a src/* $INST_DIR
+      cp -a package.json $INST_DIR
+
+  local:
+    plugin: dump
+    source: snap/local
+    override-prime: |
+      craftctl default
+      chmod +rx $CRAFT_PRIME/bin/run-flaresolverr.sh
+
+  deps:
+    plugin: nil
+    source: .
+    stage-packages:
+      - xvfb
+      # Required by Chrome
+      - libnspr4
+      - libxcomposite1
+      - libxdamage1
+      - libxfixes3
+      - libasound2t64
+      - libatk1.0-0t64
+      - libatk-bridge2.0-0t64
+      - libatspi2.0-0t64
+      - libcairo2
+      - libcups2t64
+      - libnss3
+      - libpango-1.0-0
+      # Required by Chrome but seems working w/o them
+      #- libqt5core5t64
+      #- libqt5gui5t64
+      #- libqt5widgets5t64
+      #- libqt6core6t64
+      #- libqt6gui6t64
+      #- libqt6widgets6t64
