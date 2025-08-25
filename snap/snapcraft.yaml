@@ -131,6 +131,9 @@ parts:
       mkdir -p "$INST_DIR"
       cp -a src/* $INST_DIR
       cp -a package.json $INST_DIR
+      
+      # Replace xvfbwrapper with v. 0.2.9 as newer does not work with Snap
+      sed -i 's/xvfbwrapper==.*;/xvfbwrapper==0.2.9;/g' requirements.txt
 
   local:
     plugin: dump
