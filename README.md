@@ -16,7 +16,7 @@ See https://github.com/FlareSolverr/FlareSolverr for more details.
 ## Information
 The API service is accessible by default at http://localhost:8191
 
-FlareSolverr Release 3.3.25+\
+FlareSolverr Release\
 Service is restarted on any condition.
 
 Post install command to check if service is running well and responses:
@@ -26,9 +26,9 @@ sudo snap logs flaresolverr-tak
 
 Hosts with limited resources might need to increase timeout (Check with 90s).
   
-This snap embeds Chrome .deb from Google servers as external executables cannot be called from a Snap and Ubuntu does not provides Chromium's packages ('chromium-desktop' package is a symlink to Chromium's snap).\
+This snap embeds Chromium binaries from Chromium snap as external executables cannot be called from a Snap and Ubuntu does not provides Chromium's packages ('chromium-desktop' package is a symlink to Chromium snap).\
 Thus it has quite an important size for the service it provides.\
-Thus it is limited to AMD64 architecture for now.
+Thus it is limited to Chromium snap's available architectures for now, built on same core.
 
 ## FAQ
 See my common doc about [FAQ](https://github.com/TehAppKiller/Snapcraft-common-doc/tree/main#FAQ).
@@ -37,5 +37,4 @@ See my common doc about [FAQ](https://github.com/TehAppKiller/Snapcraft-common-d
 See my common doc about [building a snap](https://github.com/TehAppKiller/Snapcraft-common-doc/tree/main#Building).
 
 ## Versionning
-See my common doc about [versionning](https://github.com/TehAppKiller/Snapcraft-common-doc/tree/main#Versionning).
 See my common doc about [versionning](https://github.com/TehAppKiller/Snapcraft-common-doc/tree/main#Versionning).
