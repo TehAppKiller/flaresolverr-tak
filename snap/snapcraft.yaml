@@ -68,7 +68,7 @@ parts:
     plugin: nil
     stage-packages:
       - python3
-	  
+      
   # /!\ Problem if different core
   chromium: # Get Chromium binaries from Chromium snap
     plugin: nil
@@ -89,7 +89,7 @@ parts:
       - curl
       - git
     override-pull: |
-	
+    
       craftctl default
       
       # Get Last Source Tag version
@@ -124,7 +124,7 @@ parts:
       rm -rf $CRAFT_PART_SRC/{,.[!.],..?}*
       git clone -b v$src_version --depth=1 --recurse-submodules https://github.com/FlareSolverr/FlareSolverr.git .
       
-	  # Fix Chromedriver detection (avoid undetected-chromedriver_x64 to DL different version, especially for none-x64 arch)
+      # Fix Chromedriver detection (avoid undetected-chromedriver_x64 to DL different version, especially for none-x64 arch)
       sed -i 's/\"\/app\/chromedriver\"/os\.getenv\(\"SNAP_USER_DATA"\)\+\"\/.local\/share\/chromedriver\"/g' src/utils.py
       sed -i 's/\"\/app\/chromedriver\"/os\.getenv\(\"SNAP_USER_DATA"\)\+\"\/.local\/share\/chromedriver\"/g' src/undetected_chromedriver/patcher.py
       
@@ -138,7 +138,7 @@ parts:
     plugin: dump
     source: snap/local
     override-prime: |
-	
+    
       craftctl default
       chmod +rx $CRAFT_PRIME/bin/run-flaresolverr.sh
 
