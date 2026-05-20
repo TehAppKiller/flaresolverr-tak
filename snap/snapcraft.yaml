@@ -77,6 +77,11 @@ parts:
       - chromium
     prime:
       - usr/lib/chromium-browser # Keep only executable folder
+    override-prime: |
+    
+      craftctl default
+      # - Fix Files permissions
+      chmod 555 usr/lib/chromium-browser/chrome-sandbox
     
   flaresolverr:
     after:
