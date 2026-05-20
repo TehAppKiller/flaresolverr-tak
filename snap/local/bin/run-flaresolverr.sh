@@ -5,7 +5,7 @@ echo "Fix ChromeDriver detection..."
 mkdir -p $SNAP_USER_DATA/.local/share
 cp $SNAP/usr/lib/chromium-browser/chromedriver $SNAP_USER_DATA/.local/share/chromedriver
 # Remove unwanted previously stored DL'd chromedriver (not required by fresh install)
-rm -rf $SNAP_USER_DATA/.local/share/chromedriver/undetected_chromedriver
+rm -rf $SNAP_USER_DATA/.local/share/undetected_chromedriver/*
 
 echo "Launching Flaresolverr..."
 cd $SNAP/Flaresolverr
