@@ -9,6 +9,7 @@ description: |
   * See https://github.com/FlareSolverr/FlareSolverr for more details.
 
   **FlareSolverr Release**
+  * 'mesa-2404' snap is required as dependency.
   * Service is restarted on any condition.
 
   **Post install command to check if service is running well and responses:**
@@ -24,7 +25,7 @@ description: |
 website: https://github.com/FlareSolverr/FlareSolverr
 source-code: https://github.com/TehAppKiller/flaresolverr-tak
 issues: https://github.com/TehAppKiller/flaresolverr-tak/issues
-contact: mailto:tehappkiller@proton.me
+contact: ['mailto:tehappkiller@proton.me', 'https://mastodon.social/@TehAppKiller']
 donation: https://whydonate.com/en/fundraising/help-teh-devz
 license: MIT
 icon: icon.svg
@@ -35,11 +36,18 @@ adopt-info: flaresolverr
 platforms:
   amd64:
   arm64:
-  armhf:
-   # Limited by Chromium snap releases (built on same core)
+  #armhf: #Chromium no more maintained
+  # Limited by Chromium snap releases (built on same core)
+    
+# Add deadsnakes ppa to have access to custom Python version
+package-repositories:
+  - type: apt
+    ppa: deadsnakes/ppa
 
 apps:
   flaresolverr:
+    extensions: [gpu]
+    command-chain: [snap/command-chain/gpu-2404-wrapper]
     command: bin/run-flaresolverr.sh
     daemon: simple
     restart-condition: always
@@ -50,10 +58,11 @@ apps:
     environment:
       PATH: $SNAP/usr/lib/chromium-browser:$PATH
       LD_LIBRARY_PATH: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/pulseaudio/:$LD_LIBRARY_PATH
+      PYTHONPATH: $SNAP/lib/python3.13/site-packages:$PYTHONPATH # Temp fix as python-plugin does not work ; as using python runtime with venv modules ; does NOT prevent python-plugin mess with the python env of snapcraft build
       
 layout:
-  /usr/share/X11:
-    bind: $SNAP/usr/share/X11
+  #/usr/share/X11: # Already done by GPU extension
+  #  bind: $SNAP/usr/share/X11
   /usr/share/fonts:
     bind: $SNAP/usr/share/fonts
   /usr/bin/xkbcomp:
@@ -64,10 +73,10 @@ plugs:
     private: true # Requirement for multithreaded Python
 
 parts:
-  python-runtime:
+  python-runtime: # use python 13 as more stable ; 14 not supported by all modules yet
     plugin: nil
     stage-packages:
-      - python3
+      - python3.13-venv # (python3 package does not include venv)
       
   # /!\ Problem if different core
   chromium: # Get Chromium binaries from Chromium snap
@@ -82,6 +91,8 @@ parts:
       craftctl default
       # - Fix Files permissions
       chmod 555 usr/lib/chromium-browser/chrome-sandbox
+      # - rm GPU files
+      rm -f usr/lib/chromium-browser/libvulkan*
     
   flaresolverr:
     after:
@@ -90,6 +101,8 @@ parts:
     plugin: python
     python-requirements:
       - requirements.txt
+    build-environment:
+      - PARTS_PYTHON_INTERPRETER: python3.13
     build-packages:
       - curl
       - git

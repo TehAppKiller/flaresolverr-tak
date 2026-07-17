@@ -17,6 +17,7 @@ See https://github.com/FlareSolverr/FlareSolverr for more details.
 The API service is accessible by default at http://localhost:8191
 
 FlareSolverr Release\
+'mesa-2404' snap is required as dependency.\
 Service is restarted on any condition.
 
 Post install command to check if service is running well and responses:
